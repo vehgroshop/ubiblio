@@ -146,9 +146,34 @@ def search_books_by_title_json(
 
 
 def book_create_from_isbn_metadata(book: dict[str, Any], isbn: str) -> schemas.BookCreate:
+    # Map fields from metadata client to BookCreate schema
+    title = book.get("Title", "")
+    author = book.get("Author", "")
+    summary = book.get("Summary", "")
+    # Genre from categories
+    genre = book.get("Categories", "")
+    # Notes: we can include page count, average rating, ratings count, language
+    notes_parts = []
+    if book.get("PageCount"):
+        notes_parts.append(f"Pages: {book['PageCount']}")
+    if book.get("AverageRating"):
+        notes_parts.append(f"Avg rating: {book['AverageRating']}")
+    if book.get("RatingsCount"):
+        notes_parts.append(f"Ratings: {book['RatingsCount']}")
+    if book.get("Language"):
+        notes_parts.append(f"Language: {book['Language']}")
+    notes = " | ".join(notes_parts) if notes_parts else ""
+    # Custom fields: Publisher -> customField1, PublishedDate -> customField2
+    customField1 = book.get("Publisher", "")
+    customField2 = book.get("PublishedDate", "")
     return schemas.BookCreate(
-        title=book["Title"],
-        author=book["Author"],
-        summary=book["Summary"],
+        title=title,
+        author=author,
+        summary=summary,
+        genre=genre,
         ISBN=isbn,
+        notes=notes,
+        customField1=customField1,
+        customField2=customField2,
+        # owned, withdrawn, ebook, library, shelf, collection left as defaults (False/None)
     )

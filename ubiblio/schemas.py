@@ -9,6 +9,9 @@ DEFAULT_GENRES=[
 class UserBase(BaseModel):
     username: str
     isAdmin: bool = Field(default=False)
+    full_name: Optional[str] = Field(default=None)
+    phone_number: Optional[str] = Field(default=None)
+    address: Optional[str] = Field(default=None)
     model_config = ConfigDict(from_attributes=True)
     
 
@@ -58,6 +61,45 @@ class BookCreate(BookBase):
     customField1: Optional[str] = Field(default=None)
     customField2: Optional[str] = Field(default=None)
     ebook: Optional[bool] = Field(default=False)
+
+class BookCopyBase(BaseModel):
+    copy_identifier: str
+    status: str = Field(default="available")
+    condition_notes: Optional[str] = Field(default=None)
+    model_config = ConfigDict(from_attributes=True)
+
+class BookCopyCreate(BookCopyBase):
+    book_id: int
+
+class BookCopy(BookCopyBase):
+    id: int
+    book_id: int
+
+class LoanBase(BaseModel):
+    user_id: int
+    copy_id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class LoanCreate(LoanBase):
+    expected_return_date: Optional[datetime] = Field(default=None)
+
+class Loan(LoanBase):
+    id: int
+    loan_date: datetime
+    expected_return_date: datetime
+    actual_return_date: Optional[datetime] = Field(default=None)
+    status: str
+
+class BookCopyResponse(BookCopy):
+    book: Optional[Book] = None
+
+class LoanResponse(Loan):
+    user: Optional[UserBase] = None
+    book_copy: Optional[BookCopyResponse] = Field(default=None, validation_alias="copy", serialization_alias="copy")
+
+class LoanReturn(BaseModel):
+    copy_id: int
+
 
 class readingListItems(BaseModel):
     id: int

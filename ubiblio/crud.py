@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 from passlib.handlers.sha2_crypt import sha512_crypt as crypto
 from . import models, schemas
 from pydantic import BaseModel
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import sqlite3
 import csv
 from .vars import *
@@ -339,6 +339,52 @@ def updateDBVersion(db: Session, version):
         cursor = conn.execute('UPDATE config SET version = ? where id = 1;',("1.0.1",))
         conn.commit()
         conn.close()
+        version = "1.0.1"
+
+    if version == "1.0.1":
+        conn = sqlite3.connect(DB_LOCATION)
+        try:
+            conn.execute('ALTER TABLE users ADD COLUMN full_name VARCHAR;')
+            conn.execute('ALTER TABLE users ADD COLUMN phone_number VARCHAR;')
+            conn.execute('ALTER TABLE users ADD COLUMN address VARCHAR;')
+        except sqlite3.OperationalError:
+            pass
+        conn.execute('UPDATE config SET version = ? where id = 1;',("1.1.0",))
+        conn.commit()
+        conn.close()
+        
+        # Migrate existing books to copies
+        books = db.query(models.Book).all()
+        for book in books:
+            copy = db.query(models.BookCopy).filter(models.BookCopy.book_id == book.id).first()
+            if not copy:
+                status = "available"
+                if book.withdrawn:
+                    status = "loaned"
+                new_copy = models.BookCopy(
+                    book_id=book.id,
+                    copy_identifier=f"COPY-{book.id}-{uuid.uuid4().hex[:6]}",
+                    status=status
+                )
+                db.add(new_copy)
+                db.commit()
+                db.refresh(new_copy)
+                
+                if book.withdrawn:
+                    user = None
+                    if book.withdrawnBy:
+                        user = db.query(models.User).filter(models.User.username == book.withdrawnBy).first()
+                    new_loan = models.Loan(
+                        user_id=user.id if user else None,
+                        copy_id=new_copy.id,
+                        loan_date=func.now(),
+                        expected_return_date=datetime.now(timezone.utc) + timedelta(days=21),
+                        status="active"
+                    )
+                    db.add(new_loan)
+                    db.commit()
+        version = "1.1.0"
+
     return
 
  
@@ -632,3 +678,71 @@ def stats(db: Session, isSum, group, target):
 #ISBN
 #library, shelf
 #2 custom fields
+
+# --- Loan & BookCopy logic ---
+
+def checkout_book(db: Session, user_id: int, copy_id: int, expected_return_date: datetime = None):
+    copy = db.query(models.BookCopy).filter(models.BookCopy.id == copy_id).first()
+    if not copy or copy.status != "available":
+        return False
+        
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        return False
+
+    if not expected_return_date:
+        expected_return_date = datetime.now(timezone.utc) + timedelta(days=21)
+
+    new_loan = models.Loan(
+        user_id=user_id,
+        copy_id=copy_id,
+        expected_return_date=expected_return_date,
+        status="active"
+    )
+    db.add(new_loan)
+    
+    copy.status = "loaned"
+    db.merge(copy)
+    
+    db.commit()
+    db.refresh(new_loan)
+    return new_loan
+
+def return_book(db: Session, copy_id: int):
+    loan = db.query(models.Loan).filter(
+        models.Loan.copy_id == copy_id, 
+        models.Loan.status.in_(["active", "overdue"])
+    ).first()
+    if not loan:
+        return False
+        
+    copy = db.query(models.BookCopy).filter(models.BookCopy.id == copy_id).first()
+    if copy:
+        copy.status = "available"
+        db.merge(copy)
+        
+    loan.actual_return_date = datetime.now(timezone.utc)
+    loan.status = "returned"
+    db.merge(loan)
+    
+    db.commit()
+    db.refresh(loan)
+    return loan
+
+def get_user_loans(db: Session, user_id: int):
+    return db.query(models.Loan).filter(models.Loan.user_id == user_id).all()
+
+def get_copy_loans(db: Session, copy_id: int):
+    return db.query(models.Loan).filter(models.Loan.copy_id == copy_id).all()
+
+def get_overdue_loans(db: Session):
+    now = datetime.now(timezone.utc)
+    loans = db.query(models.Loan).filter(models.Loan.status == "active", models.Loan.expected_return_date < now).all()
+    # Optionally update status to overdue:
+    for loan in loans:
+        loan.status = "overdue"
+        db.merge(loan)
+    if loans:
+        db.commit()
+    return db.query(models.Loan).filter(models.Loan.status == "overdue").all()
+

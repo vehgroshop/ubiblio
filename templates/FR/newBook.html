@@ -31,12 +31,11 @@
     </p>
     <p>
         <p><label for="">Genre</label></p>
-        <select name="genre" id="genre">
-					<option value="Uncategorized" selected="selected">Non classé</option>
-					{% for genre in config.genres.split(",") %}
-						<option value="{{ genre }}">{{ genre }}</option>
-					{% endfor %}
-				</select>
+<select name="genre" id="genre">
+				{% for genre in config.genres.split(",") %}
+					<option value="{{ genre }}" {% if book.genre == genre %}selected{% endif %}>{{ genre }}</option>
+				{% endfor %}
+			</select>
     </p>
 <p><label for="">eBook</label></p>
 <select name="ebook" id="ebook">
@@ -45,31 +44,31 @@
 </select>
     </p>
 				
-{% if config.customFieldName1|length > 0 %}	
+{% if config.customFieldName1|length > 0 %}
 <p><label for="">{{ config.customFieldName1 }}</label></p>
-        <input type="text" name="customField1" value="{{ customField1 }}">
-    </p>
-{% endif %}	
-{% if config.customFieldName2|length > 0 %}	
-<p><label for="">{{ config.customFieldName2 }}</label></p>
-        <input type="text" name="customField2" value="{{ customField2 }}">
+        <input type="text" name="customField1" value="{{ book.customField1 }}">
     </p>
 {% endif %}
-            </div>
+{% if config.customFieldName2|length > 0 %}
+<p><label for="">{{ config.customFieldName2 }}</label></p>
+        <input type="text" name="customField2" value="{{ book.customField2 }}">
+    </p>
+{% endif %}
+        </div>
     <div style="width:30%; min-width: 300px; float:left;">
     <p>
         <p><label for="">Bibliothèque</label></p>
-        <input type="text" name="library" value="{{ library }}">
+        <input type="text" name="library" value="{{ book.library }}">
     </p>
 
     <p>
         <p><label for="">Étagère</label></p>
-        <input type="text" name="shelf" value="{{ shelf }}" >
+        <input type="text" name="shelf" value="{{ book.shelf }}" >
     </p>
 
     <p>
         <p><label for="">Collection</label></p>
-        <input type="text" name="collection" value="{{ collection }}" >
+        <input type="text" name="collection" value="{{ book.collection }}" >
     </p>
     <p>
         <p><label for="">ISBN</label></p>
@@ -77,9 +76,9 @@
     </p>
     <p>
         <p><label for="">Notes</label></p>
-        <input type="text" name="notes" value="{{ notes }}" >
+        <input type="text" name="notes" value="{{ book.notes }}" >
     </p>
-    
+
         <p>
         <p><label for="">Possédé</label></p>
 <select name="owned" id="owned">

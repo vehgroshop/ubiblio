@@ -21,9 +21,27 @@ class BookMetadataClient:
         if response.ok:
             raw_book = json.loads(response.text)["items"][0]["volumeInfo"]
             book = {}
-            book["Title"] = raw_book["title"]
-            book["Author"] = raw_book["authors"][0]
+            book["Title"] = raw_book.get("title", "")
+            # Author: join if multiple
+            authors = raw_book.get("authors", [])
+            book["Author"] = ", ".join(authors) if authors else ""
             book["Summary"] = raw_book.get("description", "")
+            # Publisher -> customField1
+            book["Publisher"] = raw_book.get("publisher", "")
+            # Published date -> customField2
+            book["PublishedDate"] = raw_book.get("publishedDate", "")
+            # Page count -> notes (or we could add a field, but notes is flexible)
+            book["PageCount"] = str(raw_book.get("pageCount", ""))
+            # Categories -> genre (join)
+            categories = raw_book.get("categories", [])
+            book["Categories"] = ", ".join(categories) if categories else ""
+            # Average rating -> we can store in notes as well, or custom field if needed
+            book["AverageRating"] = str(raw_book.get("averageRating", ""))
+            # Ratings count
+            book["RatingsCount"] = str(raw_book.get("ratingsCount", ""))
+            # Language
+            book["Language"] = raw_book.get("language", "")
+            # Image links (thumbnail) maybe not needed now
             return book, 200
         return {}, response.status_code
 
@@ -47,6 +65,10 @@ class BookMetadataClient:
                 book["Author"] = authors[0]["name"]
             else:
                 book["Author"] = ""
+            # Only return the book if it has a title — otherwise treat as not found
+            # so the fallback chain (e.g. Wikipedia) can still run.
+            if not book.get("Title"):
+                return {}, response.status_code
             return book, 200
         else:
             return {}, response.status_code
@@ -59,11 +81,16 @@ class BookMetadataClient:
         }
         response = requests.get(url, headers=headers)
         if response.ok:
-            raw_book = json.loads(response.text)[0]
+            raw = json.loads(response.text)
+            if not raw:
+                return {}, response.status_code
+            raw_book = raw[0]
+            if not raw_book.get("title"):
+                return {}, response.status_code
             book = {}
             book["Title"] = raw_book["title"]
-            raw_author = raw_book["author"][0]
-            author = " ".join(raw_author).strip()
+            raw_author = raw_book.get("author", [[]])
+            author = " ".join(raw_author[0]).strip()
             book["Author"] = author
             book["Summary"] = ""
             return book, 200

@@ -45,7 +45,14 @@ class TestBookMetadataClientGoogleBooksByIsbn:
         assert book == {
             "Title": "Test Title",
             "Author": "A. Reader",
-            "Summary": "A fine book."
+            "Summary": "A fine book.",
+            "Publisher": "",
+            "PublishedDate": "",
+            "PageCount": "",
+            "Categories": "",
+            "AverageRating": "",
+            "RatingsCount": "",
+            "Language": "",
         }
         assert len(responses.calls) == 1
         assert responses.calls[0].request.url == url

@@ -1,19 +1,28 @@
-version: '3.8'
-
 services:
   ubiblio:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
-      - DEV=true
-      - DB_LOCATION=./config/sql_app.db
-      - SECRET_KEY_FILE=/app/config/secret_key.txt
-      - ADMIN_USERNAME=${ADMIN_USERNAME}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - CREATE_ADMIN_USER=True
+      DEV: ${DEV:-true}
+      DB_LOCATION: ${DB_LOCATION:-/app/config/sql_app.db}
+      SECRET_KEY_FILE: ${SECRET_KEY_FILE:-/app/config/secret_key.txt}
+      SIGNING_KEY_FILE: ${SIGNING_KEY_FILE:-/app/config/sign_key.txt}
+      VERIFY_KEY_FILE: ${VERIFY_KEY_FILE:-/app/config/verify_key.txt}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me}
+      CREATE_ADMIN_USER: ${CREATE_ADMIN_USER:-true}
+      USE_REDIS: ${USE_REDIS:-false}
+      LANGUAGE: ${LANGUAGE:-}
+      GB_API: ${GB_API:-}
     volumes:
       - ./:/app:cached
+      - ./data/config:/app/config
+      - ./data/export:/app/export
+      - ./data/bookImages:/app/static/bookImages
+      - ./data/eBooks:/app/static/eBooks
     ports:
       - "8000:8000"
     command: ["./entrypoint.sh"]

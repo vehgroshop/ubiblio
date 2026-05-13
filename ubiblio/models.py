@@ -9,6 +9,10 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     passhash = Column(String)
     isAdmin = Column(Boolean, default=False)
+    full_name = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)
+    address = Column(String, nullable=True)
+    loans = relationship("Loan", back_populates="user")
 
 class Book(Base):
     __tablename__ = "books"
@@ -28,6 +32,31 @@ class Book(Base):
     customField1 = Column(String, nullable=True)
     customField2 = Column(String, nullable=True)
     ebook = Column(Boolean,nullable=True, default=False)
+    copies = relationship("BookCopy", back_populates="book")
+
+class BookCopy(Base):
+    __tablename__ = "book_copies"
+    id = Column(Integer, primary_key=True)
+    book_id = Column(Integer, ForeignKey("books.id"))
+    copy_identifier = Column(String, unique=True, index=True)
+    status = Column(String, default="available")  # available, loaned, lost, maintenance
+    condition_notes = Column(String, nullable=True)
+    
+    book = relationship("Book", back_populates="copies")
+    loans = relationship("Loan", back_populates="copy")
+
+class Loan(Base):
+    __tablename__ = "loans"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    copy_id = Column(Integer, ForeignKey("book_copies.id"), index=True)
+    loan_date = Column(DateTime(timezone=True), server_default=func.now())
+    expected_return_date = Column(DateTime(timezone=True))
+    actual_return_date = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String, default="active")  # active, returned, overdue
+    
+    user = relationship("User", back_populates="loans")
+    copy = relationship("BookCopy", back_populates="loans")
 
 class readingListItems(Base):
     __tablename__ = "readinglistitems"
