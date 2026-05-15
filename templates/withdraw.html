@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block main %}
+
+<section id="two">
+	<div class="inner" style="padding: 20px 0 1em 0;">
+
+<h2>Borrow Book</h2>
+<p><strong>{{ book.title }}</strong>{% if book.author %} — {{ book.author }}{% endif %}</p>
+
+<form action="/withdraw/{{ book.id }}" method="post">
+    <p>
+        <label for="borrower_name"><strong>Borrower name</strong></label><br>
+        <input type="text" id="borrower_name" name="borrower_name"
+               list="users_list" autocomplete="off"
+               placeholder="Type a name..." required
+               style="min-width: 280px;">
+        <datalist id="users_list">
+            {% for u in users %}
+                <option value="{{ u.username }}">{{ u.username }}</option>
+            {% endfor %}
+        </datalist>
+    </p>
+    <p>
+        <input type="submit" value="Confirm Borrow">
+        &nbsp;
+        <a href="/bookDetails/{{ book.id }}" style="text-decoration:none; border:none;">
+            <button type="button">Cancel</button>
+        </a>
+    </p>
+</form>
+
+	</div>
+</section>
+
+{% endblock %}

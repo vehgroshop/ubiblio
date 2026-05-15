@@ -9,7 +9,7 @@ from .database import SessionLocal, engine
 from .dependencies import templates
 from .vars import USE_REDIS, REDIS_URL
 
-from .routers import auth, books, reading_lists, files, admin, federation, loans
+from .routers import auth, books, reading_lists, files, admin, federation
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -60,4 +60,3 @@ app.include_router(books.router)
 app.include_router(reading_lists.router)
 app.include_router(files.router)
 app.include_router(federation.router)
-app.include_router(loans.router)
