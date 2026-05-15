@@ -154,7 +154,7 @@ def book_create_from_isbn_metadata(book: dict[str, Any], isbn: str) -> schemas.B
     genre = book.get("Categories", "")
     # Notes: we can include page count, average rating, ratings count, language
     notes_parts = []
-    if book.get("PageCount"):
+    if book.get("PageCount") and book["PageCount"] not in ("0", "", None):
         notes_parts.append(f"Pages: {book['PageCount']}")
     if book.get("AverageRating"):
         notes_parts.append(f"Avg rating: {book['AverageRating']}")

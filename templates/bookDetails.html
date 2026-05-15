@@ -31,11 +31,11 @@
 		<p><strong>Last borrowed by</strong>:  {{ book.withdrawnBy }}</p>
 		{% if book.withdrawnDate %}<p><strong>On</strong>:  {{ book.withdrawnDate.strftime('%d %b %Y') }}</p>{% endif %}
 		{% endif %}
-			{% if config.customFieldName1|length > 0 %}
-<p><strong>{{config.customFieldName1}}</strong>:  {{book.customField1}}</p>
+			{% if config.customFieldName1|length > 0 or book.customField1 %}
+<p><strong>{{ config.customFieldName1 if config.customFieldName1|length > 0 else "Publisher" }}</strong>:  {{book.customField1}}</p>
 	{% endif %}
-			{% if config.customFieldName2|length > 0 %}	
-<p><strong>{{config.customFieldName2}}</strong>:  {{book.customField2}}</p>
+			{% if config.customFieldName2|length > 0 or book.customField2 %}
+<p><strong>{{ config.customFieldName2 if config.customFieldName2|length > 0 else "Published" }}</strong>:  {{book.customField2}}</p>
 	{% endif %}
 
 		</div>
