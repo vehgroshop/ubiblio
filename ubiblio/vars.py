@@ -2,10 +2,12 @@ import os
 import subprocess
 from ecdsa import SigningKey, VerifyingKey, SECP256k1, BadSignatureError
 from hashlib import sha256
+from dotenv import load_dotenv
+load_dotenv()
 # Environment vars
 DB_LOCATION = os.environ.get("DB_LOCATION", "./sql_app.db")
 
-USE_REDIS = os.environ.get("USE_REDIS", "true").lower() == "true"
+USE_REDIS = os.environ.get("USE_REDIS", "false").lower() == "true"
 REDIS_URL = os.environ.get("REDIS_URI", "redis://localhost")
 
 LANGUAGE = os.environ.get("LANGUAGE", "")

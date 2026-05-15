@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import redis.asyncio as redis
 from fastapi_limiter import FastAPILimiter
 
-from . import models
-from .database import engine
+from . import crud, models
+from .database import SessionLocal, engine
 from .dependencies import templates
 from .vars import USE_REDIS, REDIS_URL
 
@@ -43,6 +43,13 @@ async def startup():
         redis_connection = redis.from_url(
             REDIS_URL, encoding="utf-8", decode_responses=True)
         await FastAPILimiter.init(redis_connection)
+    db = SessionLocal()
+    try:
+        version = crud.getVersion()
+        if version and version != "1.1.0":
+            crud.updateDBVersion(db, version)
+    finally:
+        db.close()
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
