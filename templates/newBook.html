@@ -50,6 +50,11 @@
         <input type="text" name="customField1" value="{{ book.customField1 }}">
     </p>
 {% endif %}
+{% if config.customFieldName2|length > 0 %}
+<p><label for="">{{ config.customFieldName2 }}</label></p>
+        <input type="text" name="customField2" value="{{ book.customField2 }}">
+    </p>
+{% endif %}
         </div>
     <div style="width:30%; min-width: 300px; float:left;">
     <p>
