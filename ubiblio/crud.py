@@ -385,6 +385,17 @@ def updateDBVersion(db: Session, version):
                     db.commit()
         version = "1.1.0"
 
+    if version == "1.1.0":
+        conn = sqlite3.connect(DB_LOCATION)
+        try:
+            conn.execute('ALTER TABLE books ADD COLUMN withdrawnDate DATETIME;')
+        except sqlite3.OperationalError:
+            pass
+        conn.execute('UPDATE config SET version = ? where id = 1;', ("1.2.0",))
+        conn.commit()
+        conn.close()
+        version = "1.2.0"
+
     return
 
  

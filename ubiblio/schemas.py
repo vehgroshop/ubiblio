@@ -42,10 +42,11 @@ class Book(BookBase):
     owned: bool = Field(default=False)
     withdrawn: bool = Field(default=False)
     withdrawnBy: Optional[str] = Field(default=None)
+    withdrawnDate: Optional[datetime] = Field(default=None)
     customField1: Optional[str] = Field(default=None)
     customField2: Optional[str] = Field(default=None)
     ebook: Optional[bool] = Field(default=False)
-                
+
 class BookCreate(BookBase):
     author: Optional[str] = Field(default=None)
     summary: Optional[str] = Field(default=None)
@@ -56,8 +57,9 @@ class BookCreate(BookBase):
     ISBN: Optional[str] = Field(default=None)
     notes: Optional[str] = Field(default=None)
     owned: Optional[bool] = Field(default=None)
-    withdrawn: bool = Field(default=False)    
+    withdrawn: bool = Field(default=False)
     withdrawnBy: Optional[str] = Field(default=None)
+    withdrawnDate: Optional[datetime] = Field(default=None)
     customField1: Optional[str] = Field(default=None)
     customField2: Optional[str] = Field(default=None)
     ebook: Optional[bool] = Field(default=False)

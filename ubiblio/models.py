@@ -29,6 +29,7 @@ class Book(Base):
     owned = Column(Boolean)
     withdrawn = Column(Boolean)
     withdrawnBy = Column(String, nullable=True)
+    withdrawnDate = Column(DateTime(timezone=True), nullable=True)
     customField1 = Column(String, nullable=True)
     customField2 = Column(String, nullable=True)
     ebook = Column(Boolean,nullable=True, default=False)

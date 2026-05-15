@@ -46,7 +46,7 @@ async def startup():
     db = SessionLocal()
     try:
         version = crud.getVersion()
-        if version and version != "1.1.0":
+        if version and version != "1.2.0":
             crud.updateDBVersion(db, version)
     finally:
         db.close()

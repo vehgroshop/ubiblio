@@ -26,8 +26,10 @@
 		<p><strong>Withdrawn</strong>:  {{ book.withdrawn}}</p>
 		{% if book.withdrawn and book.withdrawnBy %}
 		<p><strong>Borrowed by</strong>:  {{ book.withdrawnBy }}</p>
+		{% if book.withdrawnDate %}<p><strong>Since</strong>:  {{ book.withdrawnDate.strftime('%d %b %Y') }}</p>{% endif %}
 		{% elif not book.withdrawn and book.withdrawnBy %}
 		<p><strong>Last borrowed by</strong>:  {{ book.withdrawnBy }}</p>
+		{% if book.withdrawnDate %}<p><strong>On</strong>:  {{ book.withdrawnDate.strftime('%d %b %Y') }}</p>{% endif %}
 		{% endif %}
 			{% if config.customFieldName1|length > 0 %}
 <p><strong>{{config.customFieldName1}}</strong>:  {{book.customField1}}</p>

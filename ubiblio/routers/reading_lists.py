@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
@@ -58,7 +60,7 @@ async def book_return(bookId, request: Request, user: admin_user):
             genre=book.genre, library=book.library, shelf=book.shelf, collection=book.collection,
             notes=book.notes, ISBN=book.ISBN, owned=book.owned, ebook=book.ebook,
             customField1=book.customField1, customField2=book.customField2,
-            withdrawn=False, withdrawnBy=book.withdrawnBy,
+            withdrawn=False, withdrawnBy=book.withdrawnBy, withdrawnDate=book.withdrawnDate,
         )
         crud.bookReturn(db, book)
     finally:
@@ -96,6 +98,7 @@ async def withdraw_book(bookId, request: Request, user: admin_user):
             notes=book.notes, ISBN=book.ISBN, owned=book.owned, ebook=book.ebook,
             customField1=book.customField1, customField2=book.customField2,
             withdrawn=True, withdrawnBy=borrower_name,
+            withdrawnDate=datetime.now(timezone.utc),
         )
         crud.bookWithdraw(db, updated)
     finally:

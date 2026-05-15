@@ -20,12 +20,13 @@
         <th>Titre</th>
         <th>Auteur</th>
         <th>Emprunté par</th>
+        <th>Depuis le</th>
       </tr>
     </thead>
     <tbody id = "tablebody">
 {% if books|length > 0 %}
 	{% for book in books %}
-		<tr><td><a href="/bookDetails/{{ book.id }}">{{ book.title }}</a></td><td>{{ book.author }}</td><td>{{ book.withdrawnBy }}</td></tr>
+		<tr><td><a href="/bookDetails/{{ book.id }}">{{ book.title }}</a></td><td>{{ book.author }}</td><td>{{ book.withdrawnBy }}</td><td>{{ book.withdrawnDate.strftime('%d %b %Y') if book.withdrawnDate else '' }}</td></tr>
 	{% endfor %}
 {% else %}
 		<tr><td>Aucun livre emprunté</td><td></td><td></td></tr>
