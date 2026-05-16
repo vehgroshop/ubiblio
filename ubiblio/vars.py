@@ -4,6 +4,12 @@ from ecdsa import SigningKey, VerifyingKey, SECP256k1, BadSignatureError
 from hashlib import sha256
 from dotenv import load_dotenv
 load_dotenv()
+
+# Latest database schema version. Bump this when adding a new migration step
+# in crud.updateDBVersion so both startup (main.py) and the root handler
+# (routers/admin.py) agree on what "up to date" means.
+LATEST_DB_VERSION = "1.2.0"
+
 # Environment vars
 DB_LOCATION = os.environ.get("DB_LOCATION", "./sql_app.db")
 

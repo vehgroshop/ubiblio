@@ -2,7 +2,11 @@
 [CmdletBinding()]
 param(
     [int]$Port = 8000,
-    [int]$TimeoutSeconds = 120
+    [int]$TimeoutSeconds = 120,
+    # Pass -Named <tunnelname> (e.g. -Named boekenpaleis) to run a pre-created
+    # named tunnel via your Cloudflare account. Without it, falls back to a
+    # disposable quick tunnel on trycloudflare.com.
+    [string]$Named
 )
 
 $ErrorActionPreference = 'Stop'
@@ -30,5 +34,10 @@ while ((Get-Date) -lt $deadline) {
 }
 if (-not $ready) { throw "App did not start on port $Port within $TimeoutSeconds seconds" }
 
-Write-Host "App is up. Launching cloudflared tunnel..." -ForegroundColor Green
-cloudflared tunnel --url "http://127.0.0.1:$Port"
+if ($Named) {
+    Write-Host "App is up. Running named tunnel '$Named'..." -ForegroundColor Green
+    cloudflared tunnel run $Named
+} else {
+    Write-Host "App is up. Launching quick tunnel..." -ForegroundColor Green
+    cloudflared tunnel --url "http://127.0.0.1:$Port"
+}

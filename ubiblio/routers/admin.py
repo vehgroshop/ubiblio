@@ -17,7 +17,7 @@ from ..dependencies import (
     current_user, admin_user, get_body,
     configForm, get_current_user_from_cookie,
 )
-from ..vars import DB_LOCATION
+from ..vars import DB_LOCATION, LATEST_DB_VERSION
 
 router = APIRouter()
 
@@ -40,7 +40,7 @@ def index(request: Request):
         databaseNotFirstVersion = crud.checkDB()
         if databaseNotFirstVersion == True:
             dbVersion = crud.getVersion()
-            if dbVersion == "1.0.1":
+            if dbVersion == LATEST_DB_VERSION:
                 response = RedirectResponse(url='/searchbooks')
             else:
                 response = RedirectResponse(url='/dbUpdateVersion')

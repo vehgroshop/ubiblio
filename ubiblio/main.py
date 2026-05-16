@@ -7,7 +7,7 @@ from fastapi_limiter import FastAPILimiter
 from . import crud, models
 from .database import SessionLocal, engine
 from .dependencies import templates
-from .vars import USE_REDIS, REDIS_URL
+from .vars import USE_REDIS, REDIS_URL, LATEST_DB_VERSION
 
 from .routers import auth, books, reading_lists, files, admin, federation
 
@@ -46,7 +46,7 @@ async def startup():
     db = SessionLocal()
     try:
         version = crud.getVersion()
-        if version and version != "1.2.0":
+        if version and version != LATEST_DB_VERSION:
             crud.updateDBVersion(db, version)
     finally:
         db.close()
