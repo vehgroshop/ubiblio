@@ -37,7 +37,9 @@ async def add_book_post(request: Request, user: admin_user):
         try:
             db = SessionLocal()
             new_book = service.book_create_from_form(form)
-            crud.createBook(db, new_book)
+            created = crud.createBook(db, new_book)
+            if created is not None and form.coverFilename:
+                service.download_easycb_cover(db, created.id, form.coverFilename)
             db.close()
             return RedirectResponse(url="/searchbooks/", status_code=status.HTTP_303_SEE_OTHER)
         except Exception as e:
@@ -253,7 +255,9 @@ async def add_another_isbn(request: Request, user: admin_user):
     if await form.is_valid():
         db = SessionLocal()
         new_book = service.book_create_from_form(form)
-        crud.createBook(db, new_book)
+        created = crud.createBook(db, new_book)
+        if created is not None and form.coverFilename:
+            service.download_easycb_cover(db, created.id, form.coverFilename)
         db.close()
         context = {
             "user": user,
@@ -269,7 +273,9 @@ async def scan_another_isbn(request: Request, user: admin_user):
     if await form.is_valid():
         db = SessionLocal()
         new_book = service.book_create_from_form(form)
-        crud.createBook(db, new_book)
+        created = crud.createBook(db, new_book)
+        if created is not None and form.coverFilename:
+            service.download_easycb_cover(db, created.id, form.coverFilename)
         db.close()
         context = {
             "user": user,

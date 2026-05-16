@@ -49,10 +49,10 @@ def createBook(db: Session, book: schemas.Book):
         db.add(book)
         db.commit()
         db.refresh(book)
-        return "True"
+        return book
     except Exception as e:
         print(e)
-        return "False"
+        return None
         
 def deleteBook(db: Session, bookId):
     try:

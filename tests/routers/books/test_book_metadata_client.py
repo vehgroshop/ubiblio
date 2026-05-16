@@ -233,6 +233,115 @@ class TestBookMetadataClientOpenLibraryByIsbn:
         assert book == {}
 
 
+class TestBookMetadataClientEasyCbByIsbn:
+    SAMPLE_BODY = (
+        "isbn:9789083316642\n"
+        "title:Het generatiepact\n"
+        "author:B. Huygebaert\n"
+        "mutationlog:\n"
+        "DescriptiveDetail.Extent.ExtentUnit:03\n"
+        "DescriptiveDetail.Extent.ExtentValue:168\n"
+        "DescriptiveDetail.Language.LanguageCode:dut\n"
+        "DescriptiveDetail.Subject.SubjectHeadingText:Roman\n"
+        "DescriptiveDetail.Subject.SubjectHeadingText:Familie\n"
+        "PublishingDetail.Imprint.ImprintName:TestImprint\n"
+        "PublishingDetail.PublishingDate.Date:20240101\n"
+        "CollateralDetail.TextContent.TextType:03\n"
+        "CollateralDetail.TextContent.Text:Korte beschrijving.\n"
+        "CollateralDetail.SupportingResource.1.ResourceVersion.ResourceLink:9789083316642_ATK.jpg\n"
+        "CollateralDetail.SupportingResource.0.ResourceVersion.ResourceLink:9789083316642_VRK.jpg\n"
+    )
+
+    @responses.activate
+    def test_easycb_by_isbn_should_return_book_metadata(self) -> None:
+        isbn = "9789083316642"
+        responses.add(
+            responses.GET,
+            f"{BookMetadataClient.EASYCB_API}/isbn/{isbn}",
+            body=self.SAMPLE_BODY,
+            status=200,
+            content_type="text/plain",
+        )
+
+        book, status = BookMetadataClient().easycb_by_isbn(isbn)
+
+        assert status == 200
+        assert book["Title"] == "Het generatiepact"
+        assert book["Author"] == "B. Huygebaert"
+        assert book["Summary"] == "Korte beschrijving."
+        assert book["Publisher"] == "TestImprint"
+        assert book["PublishedDate"] == "20240101"
+        assert book["PageCount"] == "168"
+        assert book["Language"] == "nl"
+        assert book["Categories"] == "Roman, Familie"
+        # Cover preference: VRK over ATK
+        assert book["CoverFilename"] == "9789083316642_VRK.jpg"
+
+    @responses.activate
+    def test_easycb_by_isbn_falls_back_to_atk_when_no_vrk(self) -> None:
+        isbn = "9789083316642"
+        body = (
+            "title:X\nauthor:Y\n"
+            "CollateralDetail.SupportingResource.1.ResourceVersion.ResourceLink:foo_ATK.jpg\n"
+        )
+        responses.add(
+            responses.GET,
+            f"{BookMetadataClient.EASYCB_API}/isbn/{isbn}",
+            body=body,
+            status=200,
+        )
+
+        book, status = BookMetadataClient().easycb_by_isbn(isbn)
+
+        assert status == 200
+        assert book["CoverFilename"] == "foo_ATK.jpg"
+
+    @responses.activate
+    def test_easycb_by_isbn_returns_empty_when_title_missing(self) -> None:
+        isbn = "9789083316642"
+        responses.add(
+            responses.GET,
+            f"{BookMetadataClient.EASYCB_API}/isbn/{isbn}",
+            body="isbn:9789083316642\nauthor:Anon\n",
+            status=200,
+        )
+
+        book, status = BookMetadataClient().easycb_by_isbn(isbn)
+
+        assert status == 200
+        assert book == {}
+
+    @responses.activate
+    def test_easycb_by_isbn_returns_empty_on_404(self) -> None:
+        isbn = "0000000000000"
+        responses.add(
+            responses.GET,
+            f"{BookMetadataClient.EASYCB_API}/isbn/{isbn}",
+            body="not found",
+            status=404,
+        )
+
+        book, status = BookMetadataClient().easycb_by_isbn(isbn)
+
+        assert status == 404
+        assert book == {}
+
+    @responses.activate
+    def test_easycb_by_isbn_sends_contact_header(self, monkeypatch: MonkeyPatch) -> None:
+        isbn = "9789083316642"
+        monkeypatch.setenv("EASYCB_CONTACT", "tester@example.org")
+        responses.add(
+            responses.GET,
+            f"{BookMetadataClient.EASYCB_API}/isbn/{isbn}",
+            body="title:T\nauthor:A\n",
+            status=200,
+        )
+
+        BookMetadataClient().easycb_by_isbn(isbn)
+
+        assert responses.calls[0].request.headers.get("contact") == "tester@example.org"
+
+
 class TestBookMetadataClientOpenWikiByIsbn:
     @responses.activate
     def test_open_wiki_by_isbn_should_return_book_metadata(self) -> None:

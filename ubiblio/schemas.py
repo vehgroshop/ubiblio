@@ -63,6 +63,10 @@ class BookCreate(BookBase):
     customField1: Optional[str] = Field(default=None)
     customField2: Optional[str] = Field(default=None)
     ebook: Optional[bool] = Field(default=False)
+    # Transport-only: EasyCB cover resource filename passed through ISBN preview
+    # form so the cover can be downloaded once the book row exists. Excluded
+    # from model_dump when persisting.
+    coverFilename: Optional[str] = Field(default=None, exclude=True)
 
 class BookCopyBase(BaseModel):
     copy_identifier: str

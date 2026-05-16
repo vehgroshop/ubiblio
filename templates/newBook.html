@@ -16,6 +16,7 @@
 {% endif %}
 {% if book %} 									
 <form id ="bookExistsAdder" name = "bookExistsAdder" action="/add_book" method="post">
+<input type="hidden" name="coverFilename" value="{{ book.coverFilename or '' }}">
 <div style="display:block; clear:both; float:none;">
 <div style="width:30%; min-width: 300px; float:left; margin-right:30px;">
     <p>

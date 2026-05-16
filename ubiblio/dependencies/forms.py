@@ -91,6 +91,7 @@ class bookForm:
         self.ebook: Optional[bool] = None
         self.customField1: Optional[str] = None
         self.customField2: Optional[str] = None
+        self.coverFilename: Optional[str] = None
 
     async def load_data(self):
         form = await self.request.form()
@@ -108,6 +109,7 @@ class bookForm:
         self.ebook = form.get("ebook")
         self.customField1 = form.get("customField1")
         self.customField2 = form.get("customField2")
+        self.coverFilename = form.get("coverFilename") or None
 
     async def is_valid(self):
         if not self.title:
